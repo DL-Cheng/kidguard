@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>抱抱守護星</title>
+  <meta name="description" content="幼童離距求救與高溫警示系統">
+  <meta name="theme-color" content="#3a8ee6">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/favicon-32.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="守護星">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <img src="icons/icon-192.png" alt="" class="logo">
+    <div class="brand">
+      <h1>抱抱守護星</h1>
+      <p id="devLabel">裝置：—</p>
+    </div>
+    <div class="pills">
+      <span class="pill" id="pillCloud"><i></i>雲端</span>
+      <span class="pill" id="pillDev"><i></i>裝置</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- 狀態主卡 -->
+    <section class="hero" id="hero" data-mode="idle">
+      <div class="hero-icon" id="heroIcon" aria-hidden="true"></div>
+      <div class="hero-text">
+        <h2 id="heroTitle">尚未連線</h2>
+        <p id="heroSub">請先在下方「設定」輸入裝置 ID</p>
+      </div>
+      <div class="hero-actions" id="heroActions" hidden>
+        <button class="btn btn-light" id="btnAck">我來處理</button>
+        <button class="btn btn-light" id="btnClear2">解除警報</button>
+      </div>
+      <p class="handling" id="handling" hidden></p>
+    </section>
+
+    <!-- 數據儀表 -->
+    <section class="tiles">
+      <div class="tile tile-wide">
+        <div class="tile-head"><span>距離（Wi-Fi 訊號）</span><b id="distLabel">—</b></div>
+        <div class="signal">
+          <div class="bars" id="bars"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="sig-num"><span id="rssi">—</span><small>dBm</small></div>
+        </div>
+        <div class="meter"><div class="meter-fill" id="rssiFill"></div><div class="meter-th" id="rssiTh"></div></div>
+        <div class="meter-cap"><span>遠</span><span id="thCap">門檻 -75</span><span>近</span></div>
+      </div>
+      <div class="tile">
+        <div class="tile-head"><span>環境溫度</span></div>
+        <div class="big"><span id="temp">—</span><small>°C</small></div>
+        <div class="sub" id="tempSub">門檻 35°C</div>
+      </div>
+      <div class="tile">
+        <div class="tile-head"><span>環境濕度</span></div>
+        <div class="big"><span id="humi">—</span><small>%</small></div>
+        <div class="sub" id="humiSub">DHT11</div>
+      </div>
+      <div class="tile">
+        <div class="tile-head"><span>電池</span></div>
+        <div class="big"><span id="bat">—</span><small>%</small></div>
+        <div class="batbar"><div id="batFill"></div></div>
+      </div>
+      <div class="tile">
+        <div class="tile-head"><span>最後更新</span></div>
+        <div class="big"><span id="ago">—</span><small id="agoUnit"></small></div>
+        <div class="sub" id="upSub">—</div>
+      </div>
+    </section>
+
+    <!-- 控制按鈕 -->
+    <section class="controls">
+      <button class="ctl ctl-locate" id="btnLocate">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7" fill="none"/></svg>
+        <span>找孩子<small>聲光指引 30 秒</small></span>
+      </button>
+      <button class="ctl" id="btnNight" aria-pressed="false">
+        <svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+        <span>夜燈<small id="nightState">關閉</small></span>
+      </button>
+      <button class="ctl" id="btnSilence">
+        <svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l4 6M21 9l-4 6"/></svg>
+        <span>現場靜音<small>燈號持續</small></span>
+      </button>
+      <button class="ctl" id="btnClear">
+        <svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>
+        <span>解除警報<small>已找到孩子</small></span>
+      </button>
+    </section>
+
+    <!-- 示範模式控制 -->
+    <section class="demo" id="demoBar" hidden>
+      <b>示範模式</b>
+      <button data-demo="far">模擬離距</button>
+      <button data-demo="sos">模擬 SOS</button>
+      <button data-demo="heat">模擬高溫</button>
+      <button data-demo="lost">模擬斷線</button>
+      <button data-demo="ok">恢復正常</button>
+    </section>
+
+    <!-- 事件紀錄 -->
+    <section class="card">
+      <div class="card-head">
+        <h3>事件紀錄</h3>
+        <button class="link" id="btnLogClear">清除</button>
+      </div>
+      <ul class="log" id="log"><li class="empty">目前沒有事件</li></ul>
+    </section>
+
+    <!-- 設定 -->
+    <details class="card settings" id="settings">
+      <summary><h3>設定</h3><span>裝置配對、警示門檻、通知</span></summary>
+
+      <fieldset>
+        <legend>配對與守護者</legend>
+        <label>裝置 ID<input id="inDev" placeholder="hugstar-001" autocomplete="off" autocapitalize="off"></label>
+        <label>我的稱呼（通知其他照顧者）<input id="inName" placeholder="例如：媽媽"></label>
+        <button class="btn btn-primary" id="btnConnect">儲存並連線</button>
+      </fieldset>
+
+      <fieldset>
+        <legend>警示門檻（傳送到裝置）</legend>
+        <label class="range">離距訊號門檻 <b id="vRssi">-75 dBm</b>
+          <input type="range" id="inRssi" min="-90" max="-55" step="1" value="-75"></label>
+        <label class="range">判定持續時間 <b id="vLost">8 秒</b>
+          <input type="range" id="inLost" min="3" max="30" step="1" value="8"></label>
+        <label class="range">高溫門檻 <b id="vTemp">35°C</b>
+          <input type="range" id="inTemp" min="28" max="45" step="0.5" value="35"></label>
+        <label class="range">高溫持續時間 <b id="vHold">30 秒</b>
+          <input type="range" id="inHold" min="10" max="300" step="10" value="30"></label>
+        <label class="switch"><input type="checkbox" id="inBuzzer" checked><span>裝置蜂鳴器</span></label>
+        <button class="btn btn-primary" id="btnSendCfg">傳送門檻到裝置</button>
+        <p class="hint">訊號門檻建議：先讓孩子站在「安全距離邊緣」，看當下 dBm，再設定略高 3–5 dBm。</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>手機提醒</legend>
+        <label class="switch"><input type="checkbox" id="inSound" checked><span>警示音</span></label>
+        <label class="switch"><input type="checkbox" id="inVibe" checked><span>震動</span></label>
+        <button class="btn" id="btnNotify">開啟系統通知</button>
+        <button class="btn" id="btnTest">測試手機警示</button>
+        <p class="hint">iPhone 需先「加入主畫面」並從主畫面開啟，才能收到系統通知。App 需保持開啟（可在背景）。</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>進階</legend>
+        <label>MQTT Broker（WebSocket）<input id="inBroker" placeholder="wss://broker.emqx.io:8084/mqtt"></label>
+        <label>帳號（選填）<input id="inUser" autocomplete="off"></label>
+        <label>密碼（選填）<input id="inPass" type="password" autocomplete="off"></label>
+        <label class="switch"><input type="checkbox" id="inDemo"><span>示範模式（不需硬體）</span></label>
+      </fieldset>
+    </details>
+
+    <p class="foot">DHT11 量測的是背包或玩偶周遭的環境溫濕度，作為高溫風險提醒，並非量測孩子體溫。</p>
+  </main>
+
+  <!-- 首次啟用遮罩：解鎖手機音效與通知 -->
+  <div class="gate" id="gate">
+    <div class="gate-card">
+      <img src="icons/icon-192.png" alt="">
+      <h2>抱抱守護星</h2>
+      <p>點一下開始守護，啟用警示音、震動與通知。</p>
+      <button class="btn btn-primary btn-lg" id="btnStart">開始守護</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="lib/mqtt.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
